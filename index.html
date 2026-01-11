@@ -264,7 +264,7 @@
             try {
                 const decoded = hiddenToText(match);
                 // Hiển thị kết quả giải mã trong cặp dấu [ ] để dễ nhìn
-                return `{decoded} `
+                return ` [${decoded}] `;
             } catch (e) {
                 return match;
             }
