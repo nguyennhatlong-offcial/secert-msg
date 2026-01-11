@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lương's Secret Messenger - Hệ thống Tàng Hình Độc Nhất</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --container-bg: #1e1e1e;
+            --input-bg: #2d2d2d;
+            --accent-color: #bb86fc;
+            --button-hover: #9965f4;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: var(--container-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 800px;
+        }
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        p.subtitle {
+            text-align: center;
+            opacity: 0.8;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid {grid-template-columns: 1fr;}
+        }
+        .column { display: flex; flex-direction: column; }
+        label { margin-bottom: 10px; font-weight: bold; color: var(--accent-color); }
+        textarea {
+            background-color: var(--input-bg);
+            border: 1px solid #444;
+            color: var(--text-color);
+            padding: 15px;
+            border-radius: 8px;
+            resize: vertical;
+            height: 150px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        textarea:focus { outline: 2px solid var(--accent-color); }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+        .btn-encode { background-color: var(--accent-color); color: #000; }
+        .btn-decode { background-color: transparent; border: 2px solid var(--accent-color); color: var(--accent-color); }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(187, 134, 252, 0.3); }
+        .btn-encode:hover { background-color: var(--button-hover); }
+        .btn-decode:hover { background-color: rgba(187, 134, 252, 0.1); }
+        .copy-btn {
+            margin-top: 10px;
+            padding: 8px 15px;
+            font-size: 12px;
+            align-self: flex-end;
+            background-color: #333;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Lương's Secret Messenger</h1>
+    <p class="subtitle">Hệ thống mã hóa "Nhị phân Zero-Width" độc nhất. Không dùng Extension cũ.</p>
+
+    <div class="grid">
+        <div class="column">
+            <label for="inputText">Văn bản gốc (Cần ẩn):</label>
+            <textarea id="inputText" placeholder="Nhập nội dung bí mật vào đây... Ví dụ: 'mày ngu quá'"></textarea>
+        </div>
+        <div class="column">
+            <label for="outputText">Kết quả (Tàng hình / Đã giải mã):</label>
+            <textarea id="outputText" placeholder="Kết quả sẽ hiện ở đây..." readonly></textarea>
+            <button class="copy-btn" onclick="copyResult()">Copy kết quả</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-encode" onclick="handleEncode()">🔒 Ẩn tin nhắn</button>
+        <button class="btn-decode" onclick="handleDecode()">🔓 Giải mã tin nhắn</button>
+    </div>
+
+</div>
+
+<script>
+    // --- CẤU HÌNH HỆ THỐNG MÃ HÓA MỚI ---
+    // Sử dụng 3 ký tự tàng hình phổ biến
+    const ZERO = '\u200B'; // Zero Width Space (Đại diện số 0)
+    const ONE = '\u200C';  // Zero Width Non-Joiner (Đại diện số 1)
+    const DELIMITER = '\u200D'; // Zero Width Joiner (Dấu ngăn cách các chữ)
+
+    // Hàm Ẩn tin nhắn (Chuyển sang nhị phân tàng hình)
+    function encode(text) {
+        if (!text) return "";
+        let encodedString = "";
+        for (let i = 0; i < text.length; i++) {
+            // 1. Lấy mã Unicode của ký tự
+            const charCode = text.charCodeAt(i);
+            // 2. Chuyển sang chuỗi nhị phân (binary string)
+            const binaryString = charCode.toString(2);
+            // 3. Thay thế 0 và 1 bằng ký tự tàng hình
+            let hiddenChar = "";
+            for (let bit of binaryString) {
+                hiddenChar += (bit === '0' ? ZERO : ONE);
+            }
+            // 4. Thêm vào chuỗi kết quả và thêm dấu ngăn cách
+            encodedString += hiddenChar + DELIMITER;
+        }
+        // Bọc trong một cặp dấu tàng hình để đánh dấu là tin nhắn của Lương
+        return ZERO + ZERO + encodedString + ZERO + ZERO;
+    }
+
+    // Hàm Giải mã tin nhắn
+    function decode(text) {
+        if (!text) return "";
+        // Loại bỏ dấu hiệu nhận biết ở đầu và cuối
+        let cleanText = text.replace(new RegExp(`^${ZERO}${ZERO}`), '').replace(new RegExp(`${ZERO}${ZERO}$`), '');
+        
+        // Tách chuỗi dựa trên dấu ngăn cách
+        const parts = cleanText.split(DELIMITER);
+        let decodedString = "";
+
+        for (let part of parts) {
+            if (part === "") continue;
+            // 1. Chuyển ngược ký tự tàng hình về 0 và 1
+            let binaryString = "";
+            for (let char of part) {
+                if (char === ZERO) binaryString += "0";
+                else if (char === ONE) binaryString += "1";
+            }
+            // 2. Chuyển từ nhị phân về mã Unicode (hệ thập phân)
+            if (binaryString) {
+                const charCode = parseInt(binaryString, 2);
+                 // 3. Chuyển mã Unicode về ký tự gốc
+                decodedString += String.fromCharCode(charCode);
+            }
+        }
+        return decodedString;
+    }
+
+    // --- XỬ LÝ GIAO DIỆN ---
+    function handleEncode() {
+        const input = document.getElementById('inputText').value;
+        if (!input) { alert("Vui lòng nhập nội dung cần ẩn!"); return; }
+        const encoded = encode(input);
+        // Chèn thêm một chút text thường để dễ copy (tùy chọn)
+        document.getElementById('outputText').value = "Tin nhắn ẩn của Lương: [" + encoded + "]";
+    }
+
+    function handleDecode() {
+        let input = document.getElementById('inputText').value;
+        if (!input) { alert("Paste tin nhắn cần giải mã vào ô bên trái!"); return; }
+
+        // Lọc chỉ lấy phần nằm trong ngoặc vuông [] nếu có
+        const match = input.match(/\[(.*?)\]/);
+        if (match && match[1]) {
+            input = match[1];
+        }
+
+        try {
+            const decoded = decode(input);
+            if (!decoded) throw new Error("Không tìm thấy nội dung ẩn hợp lệ.");
+             document.getElementById('outputText').value = decoded;
+        } catch (e) {
+             document.getElementById('outputText').value = "Lỗi: Đây không phải là tin nhắn ẩn do hệ thống này tạo ra, hoặc đã bị hỏng.";
+        }
+       
+    }
+
+    function copyResult() {
+        const outputText = document.getElementById('outputText');
+        outputText.select();
+        document.execCommand('copy');
+        alert("Đã copy kết quả vào bộ nhớ tạm!");
+    }
+</script>
+
+</body>
+</html>
