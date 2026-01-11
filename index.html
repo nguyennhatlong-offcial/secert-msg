@@ -22,6 +22,7 @@
             color: var(--text-main);
             margin: 0;
             display: flex;
+            flex-direction: column; /* Xếp dọc để có footer */
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -36,6 +37,7 @@
             max-width: 600px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             overflow: hidden;
+            margin-bottom: 20px; /* Cách footer một chút */
         }
 
         /* --- TABS --- */
@@ -147,10 +149,20 @@
             margin-top: 10px;
         }
 
-        /* Highlight cho phần giải mã */
-        .highlight {
-            color: #f0883e; /* Màu cam nổi bật */
+        /* --- FOOTER (TÊN NGƯỜI CODE) --- */
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        .footer a {
+            color: var(--accent-color);
+            text-decoration: none;
             font-weight: bold;
+        }
+        .footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -185,10 +197,15 @@
         <button class="action-btn btn-decode" onclick="processDecode()">Giải mã ngay</button>
 
         <div class="result-area" style="display:none;" id="resultAreaDecode">
-            <h3>Nội dung gốc là:</h3>
+            <h3>Nội dung ẩn bên trong >...<. Nội dung gốc là:</h3>
             <textarea id="outputDecode" readonly></textarea>
         </div>
     </div>
+</div>
+
+<div class="footer">
+    <p>Developed with ❤️ by <a href="#" target="_blank">NYC Anh Lương. Inbox: Phạm Đức Lương</a></p>
+    <p style="font-size: 11px; opacity: 0.6;">© 2026 Secret Messenger Tool</p>
 </div>
 
 <script>
@@ -241,13 +258,12 @@
         if (!input) return alert("Vui lòng nhập nội dung!");
 
         let foundTag = false;
-        // Logic: Thay thế nội dung trong >...< bằng tàng hình, bỏ luôn dấu > < đi
         const output = input.replace(/>(.*?)</g, (match, content) => {
             foundTag = true;
             return textToHidden(content);
         });
 
-        if (!foundTag) alert("Lưu ý: Bạn chưa đặt nội dung trong dấu >...< (Ví dụ: >Mật khẩu<). Văn bản sẽ không có gì bị ẩn.");
+        if (!foundTag) alert("Lưu ý: Bạn chưa đặt nội dung trong dấu >...<");
 
         document.getElementById('outputEncode').value = output;
         document.getElementById('resultAreaEncode').style.display = 'block';
@@ -257,14 +273,12 @@
         const input = document.getElementById('inputDecode').value;
         if (!input) return alert("Vui lòng dán tin nhắn vào!");
 
-        // Regex tìm chuỗi tàng hình
         const hiddenPattern = new RegExp(`[${ZERO}${ONE}${DELIMITER}]+`, 'g');
 
         const output = input.replace(hiddenPattern, (match) => {
             try {
                 const decoded = hiddenToText(match);
-                // Hiển thị kết quả giải mã trong cặp dấu [ ] để dễ nhìn
-                return ` [${decoded}] `;
+                return ` >${decoded}< `;
             } catch (e) {
                 return match;
             }
